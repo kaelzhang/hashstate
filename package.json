@@ -1,23 +1,23 @@
 {
-  "name": "history",
-  "description": "History manager for the web inspired by YUI3",
+  "name": "hashstate",
+  "description": "Location hash manager for the web inspired by YUI3",
   "version": "0.1.0",
-  "homepage": "https://github.com/kaelzhang/history",
+  "homepage": "https://github.com/kaelzhang/hashstate",
   "author": {
     "name": "kaelzhang",
     "email": "i@kael.me"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/kaelzhang/history.git"
+    "url": "git://github.com/kaelzhang/hashstate.git"
   },
   "bugs": {
-    "url": "https://github.com/kaelzhang/history/issues"
+    "url": "https://github.com/kaelzhang/hashstate/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/kaelzhang/history/blob/master/LICENSE-MIT"
+      "url": "https://github.com/kaelzhang/hashstate/blob/master/LICENSE-MIT"
     }
   ],
   "engines": {
@@ -32,9 +32,13 @@
   "keywords": [],
   "cortex": {
     "devDependencies": {
-      "neuron": "~3.5.6"
+      "neuron": "*"
     },
     "asyncDependencies": {},
-    "scripts": {}
+    "scripts": {},
+    "dependencies": {
+      "util": "~1.0.0",
+      "events": "~1.0.0"
+    }
   }
 }
