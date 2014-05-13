@@ -14,11 +14,11 @@ cortex install hashstate --save
 var hashState = require('hashstate')(options);
 ```
 
-- options `Object`
+- options `Object=`
 	- prefix `String='!'` Prefix to prepend when setting the hash fragment. Default to `'!'`
 	- split `String=','` String to split the key-value pairs.
 	- assign `String='='` String to join key and value of a key-value pair.
-	- window `Window`
+	- window `Window=`
 	
 The instance of `hashState` is an [EventEmitter](http://search.cortexjs.org/package/events).
 
@@ -63,14 +63,13 @@ Returns the current hash string, excluding the leading `'#'` and `options.prefix
 ### Event: hashchange
 
 - e `Object` 
-  - prev `Object` the previous hash object.
-  - current `Object` the current hash object.
-  - hash `String` the current hash string.
+  - newHash `String` the new(current) hash string.
+  - oldHash `String` the old hash string.
 
 Emitted when hash changes.
 
 ```js
 hashState.on('hashchange', function(e){
-    console.log('hashchange:', e.current);
+    console.log('hashchange:', e.newHash);
 });
 ```
