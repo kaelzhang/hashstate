@@ -1,5 +1,7 @@
 'use strict';
 
+module.exports = hashState;
+
 var win = window;
 var doc = document;
 var documentMode = doc.documentMode;
@@ -11,6 +13,10 @@ var events = require('events');
 var STR_HASH = '#';
 
 hashState.POLL_INTERVAL = 50;
+
+function hashState (options) {
+  return new HashState(options || {});
+}
 
 function HashState (options) {
   this.prefix = options.prefix || '!';
@@ -63,8 +69,13 @@ function removeLeading (str, leading) {
 // Sets the browser's location hash
 // @param {string} hash New location hash
 HashState.prototype.setHash = function (hash, options) {
-  hash = removeLeading(removeLeading(hash, STR_HASH), this.prefix);
+  hash = this._clean(hash);
+  var mute = options && options.mute;
+  this._mute(hash, mute);
   this.location.hash = (this.prefix || '') + hash;
+  if (!mute) {
+    this._poll();
+  }
 };
 
 
@@ -74,20 +85,40 @@ HashState.prototype.setHash = function (hash, options) {
 // @param {string} hash New location hash
 HashState.prototype.replaceHash = function (hash, options) {
     var base = this.location.href.replace(/#.*$/, '');
-    hash = removeLeading(hash, STR_HASH);
+    hash = this._clean(hash);
 
+    var mute = options && options.mute;
+    this._mute(hash, mute);
     this.location.replace(base + STR_HASH + (this.prefix || '') + hash);
+    if (!mute) {
+      this._poll();
+    }
 };
 
 
-HashState.prototype.getHash = function (href) {
+HashState.prototype._clean = function(hash) {
+  if (Object(hash) === hash) {
+    hash = this.stringify(hash);
+  }
+  return removeLeading(removeLeading(hash, STR_HASH), this.prefix);
+};
+
+
+HashState.prototype._mute = function(hash, mute) {
+  if (mute) {
+    this.hash = hash;
+  }
+};
+
+
+HashState.prototype.getHash = function () {
   // From YUI3
   // > Gecko's window.location.hash returns a decoded string and we want all
   // > encoding untouched, so we need to get the hash value from
   // > window.location.href instead. We have to use UA sniffing rather than
   // > feature detection, since the only way to detect this would be to
   // > actually change the hash.
-  var matches  = /#(.*)$/.exec(href || this.location.href);
+  var matches  = /#(.*)$/.exec(this.location.href);
   var hash     = matches && matches[1] || '';
 
   return removeLeading(hash, this.prefix);
@@ -106,12 +137,13 @@ hashState.nativeHashChange =
   ('onhashchange' in win || 'onhashchange' in doc)
   && (!documentMode || documentMode > 7);
 
-
 HashState.prototype._initEvents = function() {
+  this.hash = this.getHash();
+  
   if (hashState.nativeHashChange) {
-    this._pollChange();
-  } else {
     this._hashChange();
+  } else {
+    this._pollChange();
   }
 };
 
