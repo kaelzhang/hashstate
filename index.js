@@ -1,24 +1,146 @@
-
-// Opt in to strict mode of JavaScript, [ref](http://is.gd/3Bg9QR)
-// Use this statement, you can stay away from several frequent mistakes 
 'use strict';
 
-// How to use a foreign module ?
-// Take 'sample-cortex-project' for example:
-//
-// 1. to install a dependency, exec the command below inside the current repo:
-// 		cortex install sample-cortex-project --save
-// 2. use `require(module_idendifier)` method:
-// 		var hello = require('sample-cortex-project');
+var win = window;
+var doc = document;
+var documentMode = doc.documentMode;
 
-// `exports` is the API of the current module
-exports.my_method = function() {
-    // your code...
+var util = require('util');
+var events = require('events');
+
+
+var STR_HASH = '#';
+
+hashState.POLL_INTERVAL = 50;
+
+function HashState (options) {
+  this.prefix = options.prefix || '!';
+  this.split = options.split || ',';
+  this.assign = options.assign || '=';
+  this.win = options.window || window;
+  this.location = this.win.location;
+
+  this._initEvents();
+}
+
+util.inherits(HashState, events);
+
+
+// {a: 1, b: 'c'} -> 'a=1,b=c'
+HashState.prototype.stringify = function (object) {
+  var pairs = [];
+  var key;
+  var value;
+  for (key in object) {
+    value = object[key];
+    pairs.push(key + this.assign + value);
+  }
+  return pairs.join(this.split);
 };
 
-// or you could code like this:
-// 		module.exports = {
-// 			my_method: function() {
-// 	    		hello();
-// 			}
-// 		};
+
+// '#!a=1,b=c' -> {a: '1', b: 'c'}
+// '!a=1,b=c' -> {a: '1', b: 'c'}
+// '#a=1,b=c' -> {a: '1', b: 'c'}
+HashState.prototype.parse = function (str) {
+  var object = {};
+  str = removeLeading(removeLeading(str, STR_HASH), this.prefix);
+  str.split(this.split).forEach(function (pair) {
+    var split = pair.split(this.assign);
+    object[split[0]] = split[1];
+  }, this);
+  return object;
+};
+
+
+function removeLeading (str, leading) {
+  // 'abc'.indexOf('') === 0
+  return leading && str.indexOf(leading) === 0
+    ? str.substr(leading.length)
+    : str;
+}
+
+
+// Sets the browser's location hash
+// @param {string} hash New location hash
+HashState.prototype.setHash = function (hash, options) {
+  hash = removeLeading(removeLeading(hash, STR_HASH), this.prefix);
+  this.location.hash = (this.prefix || '') + hash;
+};
+
+
+// Replaces the browser's current location hash with the specified hash
+// and removes all forward navigation states, without creating a new browser
+// history entry.
+// @param {string} hash New location hash
+HashState.prototype.replaceHash = function (hash, options) {
+    var base = this.location.href.replace(/#.*$/, '');
+    hash = removeLeading(hash, STR_HASH);
+
+    this.location.replace(base + STR_HASH + (this.prefix || '') + hash);
+};
+
+
+HashState.prototype.getHash = function (href) {
+  // From YUI3
+  // > Gecko's window.location.hash returns a decoded string and we want all
+  // > encoding untouched, so we need to get the hash value from
+  // > window.location.href instead. We have to use UA sniffing rather than
+  // > feature detection, since the only way to detect this would be to
+  // > actually change the hash.
+  var matches  = /#(.*)$/.exec(href || this.location.href);
+  var hash     = matches && matches[1] || '';
+
+  return removeLeading(hash, this.prefix);
+};
+
+
+// From YUI3
+// > Most browsers that support hashchange expose it on the window. Opera 10.6+
+// > exposes it on the document (but you can still attach to it on the window).
+//
+// > IE8 supports the hashchange event, but only in IE8 Standards
+// > Mode. However, IE8 in IE7 compatibility mode still defines the
+// > event but never fires it, so we can't just detect the event. We also can't
+// > just UA sniff for IE8, since other browsers support this event as well.
+hashState.nativeHashChange = 
+  ('onhashchange' in win || 'onhashchange' in doc)
+  && (!documentMode || documentMode > 7);
+
+
+HashState.prototype._initEvents = function() {
+  if (hashState.nativeHashChange) {
+    this._pollChange();
+  } else {
+    this._hashChange();
+  }
+};
+
+
+HashState.prototype._pollChange = function() {
+  var self = this;
+  setInterval(function () {
+    self._poll();
+  }, hashState.POLL_INTERVAL);
+};
+
+
+HashState.prototype._poll = function() {
+  var hash = this.getHash();
+  var old = this.hash;
+  if (hash !== old) {
+    this.hash = hash;
+    this.emit('hashchange', {
+      newHash: hash,
+      oldHash: old
+    });
+  }
+};
+
+
+HashState.prototype._hashChange = function() {
+  var self = this;
+  this.win.addEventListener('hashchange', function (e) {
+    self._poll();
+
+  }, false);
+};
