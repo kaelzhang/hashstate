@@ -43,15 +43,19 @@ hashState.parse('#a=1,b=c'); // {a: '1', b: 'c'}
 hashState.parse('a=1,b=c'); // {a: '1', b: 'c'}
 ```
 
-### .setHash(hash)
+### .setHash(hash, options)
 
 - hash `String` hash string.
+- options `Object`
+	- mute `Boolean` if `true`, calling this method will not emit a `'hashchange'` event. 
 
 Changes the current location hash, which will add a new history entry.
 
-### .replaceHash(hash)
+### .replaceHash(hash, options)
 
 - hash `String` hash string.
+- options `Object`
+	- mute `Boolean` if `true`, calling this method will not emit a `'hashchange'` event.
 
 Changes location hash and replaces the current history  entry instead of adding a new entry.
 
