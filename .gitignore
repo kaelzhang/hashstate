@@ -2,6 +2,7 @@
 build/
 reference/
 .cortex/
+neurons/
 
 # PHP files
 index.php
