@@ -33,6 +33,15 @@ var cases = [
   }
 },
 {
+  d: '.parse() a non string',
+  e: function (h, next) {
+    assert.deepEqual({}, h.parse(undefined));
+    assert.deepEqual({}, h.parse({}));
+    assert.deepEqual({}, h.parse(null));
+    next();
+  }
+},
+{
   d: '.stringify()',
   e: function (h, next) {
     var str = h.stringify({a: 1, b: 2});
@@ -44,7 +53,7 @@ var cases = [
   d: '.stringfy() a undefined property',
   e: function (h, next) {
     var str = h.stringify({a: undefined, b: 2});
-    assert.ok(str === 'a=,b=2');
+    assert.strictEqual(str, 'a=,b=2');
     next();
   }
 },

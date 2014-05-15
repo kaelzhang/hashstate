@@ -26,13 +26,18 @@
   "scripts": {
     "test": "grunt test"
   },
-  "devDependencies": {
-    "grunt": "~0.4.2"
-  },
-  "keywords": [],
+  "keywords": [
+    "hash",
+    "hashstate",
+    "hashchange",
+    "history",
+    "location"
+  ],
   "cortex": {
     "devDependencies": {
-      "neuron": "*"
+      "neuron": "*",
+      "assert": "~1.0.1",
+      "async": "~0.2.9"
     },
     "asyncDependencies": {},
     "scripts": {},

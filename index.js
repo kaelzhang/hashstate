@@ -25,6 +25,11 @@ function HashState (options) {
   this.win = options.window || window;
   this.location = this.win.location;
 
+  var self = this;
+  this._p = function () {
+    self._poll();
+  };
+
   this._initEvents();
 }
 
@@ -38,6 +43,9 @@ HashState.prototype.stringify = function (object) {
   var value;
   for (key in object) {
     value = object[key];
+    value = value === undefined
+      ? ''
+      : value;
     pairs.push(key + this.assign + value);
   }
   return pairs.join(this.split);
@@ -49,11 +57,13 @@ HashState.prototype.stringify = function (object) {
 // '#a=1,b=c' -> {a: '1', b: 'c'}
 HashState.prototype.parse = function (str) {
   var object = {};
-  str = removeLeading(removeLeading(str, STR_HASH), this.prefix);
-  str.split(this.split).forEach(function (pair) {
-    var split = pair.split(this.assign);
-    object[split[0]] = split[1];
-  }, this);
+  if (util.isString(str)) {
+    str = removeLeading(removeLeading(str, STR_HASH), this.prefix);
+    str.split(this.split).forEach(function (pair) {
+      var split = pair.split(this.assign);
+      object[split[0]] = split[1] || undefined;
+    }, this);
+  }
   return object;
 };
 
@@ -150,7 +160,7 @@ HashState.prototype._initEvents = function() {
 
 HashState.prototype._pollChange = function() {
   var self = this;
-  setInterval(function () {
+  this.timer = setInterval(function () {
     self._poll();
   }, hashState.POLL_INTERVAL);
 };
@@ -170,9 +180,5 @@ HashState.prototype._poll = function() {
 
 
 HashState.prototype._hashChange = function() {
-  var self = this;
-  this.win.addEventListener('hashchange', function (e) {
-    self._poll();
-
-  }, false);
+  this.win.addEventListener('hashchange', this._p, false);
 };
