@@ -33,6 +33,10 @@
     "history",
     "location"
   ],
+  "dependencies": {
+    "util": "~1.0.0",
+    "events": "~1.0.0"
+  },
   "cortex": {
     "devDependencies": {
       "neuron": "*",
