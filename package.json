@@ -1,7 +1,7 @@
 {
   "name": "hashstate",
   "description": "Location hash manager for the web inspired by YUI3",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/kaelzhang/hashstate",
   "author": {
     "name": "Kael",
@@ -34,8 +34,8 @@
     "location"
   ],
   "dependencies": {
-    "util": "~1.0.0",
-    "events": "~1.0.0"
+    "util": "^1.0.0",
+    "events": "^1.0.0"
   },
   "cortex": {
     "devDependencies": {
